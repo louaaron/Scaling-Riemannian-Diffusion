@@ -1,0 +1,42 @@
+defaults:
+  - override hydra/launcher: submitit_slurm
+
+root: /atlas2/u/aaronlou/datasets/
+data: CIFAR-10
+size: 128
+
+train:
+  lr: 5e-4
+  itrs: 1000000
+  batch_size: 512
+
+model:
+  dim: 256
+  num_blocks: 4
+  dropout: 0.1
+  ema: 0.999
+  scale_by_sigma: True
+  precond: True
+
+sigma_min: 0.001
+# 0.6 for 128, 0.3 for 512
+sigma_max: 0.6
+C: 24G
+
+
+hydra:
+  run:
+    dir: /atlas2/u/aaronlou/exp/riem_diff_pp/ood/${data}/${now:%Y.%m.%d}/${now:%H%M%S}
+  sweep:
+    dir: /atlas2/u/aaronlou/exp/riem_diff_pp/ood/${data}/${now:%Y.%m.%d}/${now:%H%M%S}
+    subdir: ${hydra.job.num}
+  launcher:
+    max_num_timeout: 100000
+    timeout_min: 10079
+    partition: atlas
+    account: atlas
+    mem_gb: 32
+    # exclude: atlas11,atlas15,atlas16,atlas17,atlas18
+    cpus_per_task: 4
+    gpus_per_node: 1
+    constraint: ${C}
